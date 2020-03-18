@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,35 +20,13 @@ import java.util.List;
  * @Description:
  */
 public class ExcelUtil {
-    @Test
-    public void ceshi(){
-        createXLS();
+    public static final String FILE_PATH = "src/main/resources/excel/";
+    public static void main(String[] args) throws Exception{
+//        readXLS("test.xls");
+        BigDecimal bd = new BigDecimal("1.200853632E7");
+        String str = bd.toPlainString();
+        System.out.println(str);
     }
-
-    private static void readExcel() throws IOException, WriteException, BiffException {
-        //1:创建workbook
-        Workbook workbook=Workbook.getWorkbook(new File("test.xls"));
-        //2:获取第一个工作表sheet
-        Sheet sheet=workbook.getSheet(0);
-        System.out.println("测试");
-        Label cc = new Label(0, 0, "测试");
-
-
-        //3:获取数据
-        System.out.println("行："+sheet.getRows());
-        System.out.println("列："+sheet.getColumns());
-        for(int i=0;i<sheet.getRows();i++){
-            for(int j=0;j<sheet.getColumns();j++){
-                Cell cell=sheet.getCell(j,i);
-                System.out.print(cell.getContents()+" ");
-            }
-            System.out.println();
-        }
-
-        //最后一步：关闭资源
-        workbook.close();
-    }
-
 
     // 创建表格
     public static void createXLS() {
@@ -71,26 +51,38 @@ public class ExcelUtil {
     }
 
     // 读取Excel
-    public static void readXLS(String pathName) {
+    public static List<List<String>> readXLS(String pathName,Integer hangshu) {
+        List<List<String>> lists = new ArrayList<>();
+
         try {
-            Workbook book = Workbook.getWorkbook(new File("test.xls"));
+            Workbook book = Workbook.getWorkbook(new File(FILE_PATH+pathName+".xls"));
             Sheet sheet = book.getSheet(0);
             Cell cell = sheet.getCell(0, 0);
-            String result = cell.getContents();
-            System.out.println(result);
+            for (int row = hangshu; row<sheet.getRows(); row++ ){
+                List rowLine = new ArrayList();
+                for (int col = 0; col<sheet.getColumns(); col++){
+                    String contents = sheet.getCell(col, row).getContents();
+                    System.out.print(contents+" ");
+                    rowLine.add(contents);
+                }
+                System.out.println();
+                lists.add(rowLine);
+            }
+
             book.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return lists;
     }
 
     // 修改Excel的类，添加一个工作表
     public static void insertLine(List<List<String>> lists) {
         try {
-            File file = new File("test.xls");
+            File file = new File(FILE_PATH+"newRI.xls");
             Workbook wb = Workbook.getWorkbook(file);
             // 打开一个文件的副本，并且指定数据写回到原文件
-            WritableWorkbook book = Workbook.createWorkbook(new File("test.xls"), wb);
+            WritableWorkbook book = Workbook.createWorkbook(new File("newRI.xls"), wb);
             WritableSheet sheet = book.getSheet(0);
 
             int rows = sheet.getRows();
@@ -104,14 +96,6 @@ public class ExcelUtil {
                 rows++;
                 column=0;
             }
-            //遍历
-            //for(int i=0;i<sheet.getRows();i++){
-            //    for(int j=0;j<sheet.getColumns();j++){
-            //        Cell cell=sheet.getCell(j,i);
-            //        System.out.print(cell.getContents()+" ");
-            //    }
-            //    System.out.println();
-            //}
 
             book.write();
             book.close();
